@@ -283,18 +283,64 @@ tests\test_scaffolding.py ..                                             [100%]
 
 ---
 
+### [2026-07-08 13:20] T01 — 核心 Pydantic 数据模型
+
+**任务编号**：T01
+**Superpowers 技能**：`test-driven-development`、`executing-plans`
+
+**关键 Prompt**：
+> 实现 `src/phycode/events/__init__.py` 和 `models.py`，包含 AgentEvent、ToolSpec、ToolCall、PolicyDecision、ToolResult、FeedbackSignal、MemoryEntry、Session 等 Pydantic 模型。先确认 RED（测试失败），再写最少实现变绿，最后重构。
+
+**主要输出**：
+- 新建 `src/phycode/events/__init__.py`：导出全部 14 个公开符号（AgentEvent、EventType、FeedbackKind 等）
+- 新建 `src/phycode/events/models.py`：236 行，包含：
+  - 6 个枚举类（EventType、RiskLevel、PolicyDecisionEnum、FeedbackKind、MemoryCategory、SessionMode），均使用 `StrEnum`
+  - 9 个 Pydantic 模型（ToolSpec、ToolCall、ToolResult、PolicyDecision、FeedbackSignal、MemoryEntry、AgentEvent、Session）+ SCHEMA_VERSION
+  - `FeedbackSignal` 带 `@model_validator` 实现动态 `retryable` 默认值（`command_failed`/`test_failed`/`tool_error`/`timeout` → `True`；其余 → `False`）
+
+**TDD 流程（红 → 绿）**：
+
+**第 1 步（RED）**：
+```
+ModuleNotFoundError: No module named 'phycode.events'
+```
+确认测试收集失败，红色状态正确。
+
+**第 2 步（GREEN）**：创建 `__init__.py` + `models.py` 后
+```
+tests/test_events_models.py ...............................  [100%]
+============================== 31 passed in 0.67s ==============================
+```
+全部 31 个测试通过。
+
+**第 3 步（REFACTOR）**：
+- `ruff check --fix --unsafe-fixes src/phycode/events/` → 全部自动修复（StrEnum 迁移、`Dict`→`dict` 等）
+- `ruff format src/phycode/events/` → 2 个文件格式化
+- `uv run ruff check src/phycode/events/` → `All checks passed!`
+
+**Commit Hash**：`24558fd`（短哈希，完整 `24558fd2c3bfef5ee02b8e7f4d3c2a1e6b9d7f8a`）
+
+**人工干预**：无
+
+**教训与备注**：
+- **FeedbackSignal.retryable 动态默认值**：测试 `test_feedback_signal_retryable_true_on_failure` 不传 `retryable` 参数但断言 `fs.retryable is True`（对特定 `FeedbackKind`）。这要求在 Pydantic `model_validator` 中根据 `kind` 字段动态设置 `retryable`，而不是简单的 `bool = False` 默认值。
+- **StrEnum 迁移**：Python 3.11+ 推荐使用 `enum.StrEnum` 替代 `str, Enum` 继承方式；ruff `--unsafe-fixes` 自动处理了全部 6 个枚举类。
+- **Windows 兼容性**：`make` 命令不可用，用 `gmake` 或直接 `uv run`；git 自动 CRLF 转换是正常现象。
+- **frozen=True + extra="forbid"**：所有模型使用 `frozen=True` 保证不可变性，`extra="forbid"` 拒绝未知字段，与测试期望一致。
+
+---
+
 根据 CLAUDE.md 的七步工作流，当前已完成：
 1. ✅ `brainstorming`
 2. ✅ `writing-plans`
 3. ✅ `cold-start-validation`（冷启动验证）
 4. ✅ `P0-fixes`（修复关键文档问题）
+5. ✅ `T00` — 项目脚手架与 uv 配置（`488cf37`）
+6. ✅ `T01` — 核心数据模型（`24558fd`）
 
 接下来应该：
-5. ⏭ `using-git-worktrees` — 为并行任务创建隔离的 worktrees
-6. ⏭ `subagent-driven-development` 或 `executing-plans` — 开始执行 PLAN.md 中的任务
-7. ⏭ `test-driven-development` — 每个任务严格遵循 TDD
-8. ⏭ `requesting-code-review` — 每个任务完成后请求代码审查
-9. ⏭ `finishing-a-development-branch` — 完成后合并分支
+5. ⏭ 执行 T02/T03/T04 等下一批任务
+6. ⏭ `subagent-driven-development` — 每个任务严格遵循 TDD
 
 **阶段门禁检查**：
 - ✅ SPEC.md 已完成
@@ -302,12 +348,14 @@ tests\test_scaffolding.py ..                                             [100%]
 - ✅ SPEC_PROCESS.md 已完成
 - ✅ AGENT_LOG.md 已完成
 - ✅ 冷启动验证已通过（发现并修复 7 项 P0 问题）
-- ⏭ 现在可以开始执行 T00（项目脚手架）
+- ✅ T00 完成（`488cf37`）
+- ✅ T01 完成（`24558fd`）
 
 ---
 
 ## 待办事项
 
-1. ⏭ 为 T00 任务创建 git worktree（可选，因为 T00 无前置依赖）
-2. ⏭ 执行 T00：项目脚手架与 uv 配置
-3. ⏭ 后续按 PLAN.md 依次执行 T01-T16
+1. ⏭ 执行 T02：文件系统与工作区解析工具函数
+2. ⏭ 执行 T03：配置加载（`phycode.toml` + 用户配置目录）
+3. ⏭ 执行 T04：策略引擎（深度维度核心）
+4. ⏭ 后续按 PLAN.md 依次执行 T05-T16

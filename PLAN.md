@@ -124,6 +124,8 @@ uv run pytest tests/test_events_models.py -v
 
 **并行**：是，可与 `T02`、`T03` 在同一 worktree 阶段并行（不同文件）。
 
+**完成状态**：✅ 完成（`24558fd`）
+
 ---
 
 ## T02 — 文件系统与工作区解析工具函数
