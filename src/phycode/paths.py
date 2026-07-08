@@ -6,21 +6,7 @@ import os
 from collections.abc import Iterable
 from pathlib import Path
 
-from phycode.errors import PhyCodeError
-
-
-class PathEscapeError(PhyCodeError):
-    """Raised when a path operation escapes the allowed workspace root."""
-
-    def __init__(
-        self,
-        message: str,
-        requested: str | None = None,
-        root: Path | None = None,
-    ) -> None:
-        super().__init__(message)
-        self.requested = requested
-        self.root = root
+from phycode.errors import PathEscapeError
 
 
 def resolve_workspace_path(root: Path, requested: str) -> Path:

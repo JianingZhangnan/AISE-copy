@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
 
 class PhyCodeError(Exception):
     """Base exception for all PhyCode errors."""
@@ -17,7 +22,7 @@ class PathEscapeError(PhyCodeError):
         self,
         message: str,
         requested: str | None = None,
-        root: str | None = None,
+        root: Path | None = None,
     ) -> None:
         super().__init__(message)
         self.requested = requested

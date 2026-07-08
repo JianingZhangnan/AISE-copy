@@ -2,19 +2,21 @@
 
 RED phase: these tests must fail because src/phycode/paths.py does not exist yet.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
+
 import pytest
 
-from phycode.paths import (
-    resolve_workspace_path,
-    is_within_allowed,
-    symlink_escape,
-    safe_join,
-    PathEscapeError,
-)
 from phycode.errors import PhyCodeError
+from phycode.paths import (
+    PathEscapeError,
+    is_within_allowed,
+    resolve_workspace_path,
+    safe_join,
+    symlink_escape,
+)
 
 
 class TestResolveWorkspacePath:
