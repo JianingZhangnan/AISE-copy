@@ -322,14 +322,14 @@ test_command = "uv run pytest"
 
 CI：
 
-- `.gitlab-ci.yml` 必须包含名为 `unit-test` 的 job，运行 `uv run pytest`。
-- 可为当前 GitHub 开发添加 GitHub Actions，但不取代 `.gitlab-ci.yml`。
+- `.github/workflows/ci.yml`（必需）：每次 push 自动运行测试；课程通用要求 §4.8 / §五明确为 GitHub Actions。
+- `.gitlab-ci.yml`（必需）：用于 NJU Git 的 CI 校验；必须包含名为 `unit-test` 的 job。
 - CI 仅使用 mock LLM，不需要 API key。
 
 仓库平台：
 
-- 项目当前使用 GitHub 仓库 `JianingZhangnan/AISE` 进行开发，因最终平台尚未确认。
-- 如需提交到 NJU Git，应以 GitHub 仓库为源镜像迁移，并在过程文档中记录。
+- 当前开发使用 GitHub 仓库 `JianingZhangnan/AISE-copy`（对比实验版本）。
+- 最终提交平台为 **NJU Git**（课程要求）；应以 GitHub 仓库为源镜像迁移，保留完整 commit / PR 历史与 CI 配置。
 
 ## 6. 非功能需求
 
@@ -645,7 +645,7 @@ Python 标准测试框架，支持 fixture、参数化和插件生态，与 mock
 - 过度使用供应商状态或 Agents SDK：保持 PhyCode 循环自实现。
 - 安全仅靠提示词：在确定性代码和测试中强制护栏。
 - 上下文管理过于复杂：仅实现会话历史、记忆摘要、截断和预算选择。
-- 最终仓库平台不确定：在 GitHub 上开发，如需要则迁移/镜像到 NJU Git。
+- 最终提交平台为 NJU Git（课程要求 §五）。当前在 GitHub 仓库 `JianingZhangnan/AISE-copy` 上开发；最终以本地仓库为源镜像迁移到 NJU Git。
 - 真实 API 不稳定：CI 和必需演示保持在 mock LLM 上。
 
 ## 13. 未来扩展方向
@@ -654,6 +654,6 @@ Python 标准测试框架，支持 fixture、参数化和插件生态，与 mock
 
 ## 14. 未决事项
 
-- 最终提交平台取决于课程确认。当前开发使用 GitHub。
+- 最终提交平台为 NJU Git（课程已明确）。当前使用 GitHub 仓库 `JianingZhangnan/AISE-copy` 进行开发，提交 NJU Git 前需镜像迁移。
 - Docker 打包为可选项，在核心 harness、测试、文档和 CI 完成后视时间决定。
 - 如未来需要 WebUI 或演示可视化，trace JSONL 的结构化格式已预留支持。

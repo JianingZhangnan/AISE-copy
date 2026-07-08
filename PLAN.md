@@ -894,24 +894,28 @@ uv run pytest tests/test_demos.py -v
 
 ---
 
-## T15 — CI（`.gitlab-ci.yml` + GitHub Actions 可选）、一键测试、PyPI 发布
+## T15 — CI（GitHub Actions 必需 + GitLab CI 必需）、一键测试、PyPI 发布
 
-**目标**：让 `uv run pytest` 在 CI 中通过；提供 `make test`、`make publish-dry-run`；预备 `pyproject.toml` 的 `build-system` 与 metadata。
+**目标**：让 `uv run pytest` 在 CI 中通过；提供 `make test`、`make publish-dry-run`；预备 `pyproject.toml` 的 `build-system` 与 metadata；确保 CI/CD 最后一次执行是 pass（课程硬性要求）。
 
 **涉及文件**：
 
-- 新建 `.gitlab-ci.yml`
-- 新建 `.github/workflows/ci.yml`（可选）
+- 新建 `.github/workflows/ci.yml`（必需，课程通用要求 §4.8 / §五明确指定 GitHub Actions）
+- 新建 `.gitlab-ci.yml`（必需，用于 NJU Git 校验；必须包含名为 `unit-test` 的 job）
 - 新建/更新 `Makefile`（追加 `make demo`、`make publish-dry-run`）
 - 更新 `pyproject.toml`（补 `build-system = {requires = ["hatchling>=1.18"], build-backend = "hatchling.build"}`、`[project.urls]`、`[tool.hatch.build.targets.wheel]` 等）
 
 **实现要点**：
 
+- `.github/workflows/ci.yml`：
+  - `runs-on: ubuntu-latest`，`python-version: ["3.11"]`。
+  - 安装 `pip install uv`。
+  - jobs：`unit-test`：`steps: [checkout, setup-python, pip install uv, uv sync, uv run pytest --maxfail=1 --disable-warnings -q]`。
+  - 不需要任何 API key；不下载第三方模型。
 - `.gitlab-ci.yml`：
   - `image: python:3.11-slim`
   - 安装 `pip install uv`。
   - 唯一 job：`unit-test`：`script: ["uv sync", "uv run pytest --maxfail=1 --disable-warnings -q"]`、`cache: {paths: [.cache/uv]}`。
-  - 不需要任何 API key；不下载第三方模型。
 - `Makefile`：
   - `test`：`uv run pytest`
   - `lint`：`uv run ruff check .`

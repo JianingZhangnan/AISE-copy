@@ -117,7 +117,9 @@ The required command is `uv run pytest`.
 
 Python with `uv` is the primary development and distribution path. `.gitlab-ci.yml` must include a `unit-test` job. GitHub Actions may be added for convenience while development happens on GitHub.
 
-The course submission platform is not yet final. The project currently uses GitHub repository `JianingZhangnan/AISE`; if NJU Git becomes required, the repository will be mirrored or migrated and the switch recorded in process documents.
+The course submission platform is **NJU Git** (per the general requirements §五). The project currently uses the GitHub repository `JianingZhangnan/AISE-copy` (a comparison experiment branch) for development; the NJU Git repository will be mirrored from the local working copy at `d:\cs\AISE - Copy`, preserving the full commit history, CI configuration, and deliverables. The switch will be recorded in `AGENT_LOG.md` / `SPEC_PROCESS.md`.
+
+**CI must include both** `.github/workflows/ci.yml` (GitHub Actions, required for daily CI on the GitHub repo) and `.gitlab-ci.yml` (with a `unit-test` job, required for NJU Git CI). The CI/CD pipeline's last execution **must** be in `pass` state (per course requirements).
 
 ## Formal Spec
 

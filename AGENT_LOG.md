@@ -151,39 +151,45 @@
 - 配置本地用户：`PhyCode Developer <phycode@example.com>`
 - 扩展 `.gitignore` 覆盖 Python、构建产物、本地状态、IDE 文件
 - 提交初始文档：`9db1c04 Initial: SPEC, PLAN, process docs and course resources`
+- 推送至 GitHub：`JianingZhangnan/AISE-copy`（自动认证通过，无需手动 PAT）
 
-**Commit Hash**：`9db1c04`
+**Commit Hash 序列**：
+- `9db1c04` — Initial: SPEC, PLAN, process docs and course resources
+- `2ce2719` — docs: log git init and CI/CD plan
 
-**包含文件**：
-- `SPEC.md`、`PLAN.md`、`SPEC_PROCESS.md`、`AGENT_LOG.md`、`CLAUDE.md`
-- `.gitignore`
-- `course_resource/`（课程原始资料）
-- `docs/superpowers/specs/`（brainstorming 设计笔记）
+**推送结果**：✅ 成功
 
-**关于 GitHub 仓库**：
-- 暂未推送到 GitHub，因为需要用户提供以下信息：
-  - GitHub 用户名/组织名
-  - Personal Access Token (PAT)
-  - 目标仓库名（CLAUDE.md 提到 `JianingZhangnan/AISE`）
-- 创建 GitHub 仓库的步骤：
-  1. 用户在 GitHub 上创建空仓库（不要初始化 README/.gitignore）
-  2. 提供 Personal Access Token（需要 `repo` 权限）
-  3. 添加远程源：`git remote add origin https://github.com/<user>/<repo>.git`
-  4. 推送：`git push -u origin master`
+---
 
-**关于 CI/CD**：
-- 课程明确要求 `.gitlab-ci.yml` 必须包含名为 `unit-test` 的 job
-- CLAUDE.md §5.10 允许添加 GitHub Actions 但不取代 GitLab CI
-- 推荐设置：
-  - **GitLab CI**（必需）：`.gitlab-ci.yml` — 课程作业提交平台（如果用 NJU Git）
-  - **GitHub Actions**（推荐）：`.github/workflows/ci.yml` — 当前开发平台使用
-- CI 配置文件将在 T15 任务中创建
+### [2026-07-08 11:35] 修正文档中错误的 CI / 仓库策略信息
 
-**人工干预**：用户提供 GitHub 凭证后才能推送
+**触发原因**：用户指出仓库中存在错误信息；我随后查阅 `course_resource\AI4SE_Final_Project_通用要求.md` 发现三处关键错误：
+
+1. **CI 平台错误**：CLAUDE.md 和 SPEC.md 写"`.gitlab-ci.yml` 必须包含 `unit-test` job"，但课程 §4.8 / §五明确要求 **GitHub Actions**（每次 push 自动运行测试）。
+2. **提交平台错误**：CLAUDE.md 写"最终平台待定"，但课程 §五明确 NJU Git 是最终提交平台。
+3. **GitHub 仓库名错误**：CLAUDE.md 残留旧仓库名 `JianingZhangnan/AISE`（另一个 agent 的实验），正确名应为 `JianingZhangnan/AISE-copy`（用户创建用于对比实验）。
+
+**Subagent ID**：`6698fd40-11b1-4597-91d1-2f653e08351d`
+
+**修改文件**：
+- `CLAUDE.md` — 改写"当前仓库策略"和新增"CI / CD 要求（重要更正）"小节
+- `SPEC.md` §5.10 — 明确 GitHub Actions 必需 + `.gitlab-ci.yml` 必需（用于 NJU Git 校验）；改写"仓库平台"为 NJU Git + AISE-copy
+- `SPEC.md` §12 风险与应对 — 更新"最终仓库平台"
+- `SPEC.md` §14 未决事项 — 更新"最终提交平台"
+- `docs/superpowers/specs/...design.md` — 同步英文版的提交平台与 CI 说明
+- `PLAN.md` §T15 — 标题改为"CI（GitHub Actions 必需 + GitLab CI 必需）"，把 GitHub Actions 配置从可选升为必需，并补充完整 steps
+
+**修正后的核心事实**：
+- **CI 必须同时配置**：`.github/workflows/ci.yml`（必需）+ `.gitlab-ci.yml`（必需，含 `unit-test` job）
+- **最终提交平台**：NJU Git（以本地仓库为源镜像迁移）
+- **CI/CD 最后一次执行必须 pass**（课程硬性要求）
+
+**Commit Hash**：（待提交）
 
 **教训与备注**：
-- 本地 git 仓库是 GitHub 仓库的源，迁移到 NJU Git 时只需镜像
-- CI 配置文件必须在 T15 任务中创建，不能提前添加（避免在脚手架不完整时 CI 失败）
+- **课程原始资料必须在做任何架构决策前通读**——CLAUDE.md / SPEC.md 都基于"通用要求"和"A 题要求"，但本次发现 CLAUDE.md 对 CI 的理解是错的（写成 GitLab CI 而不是 GitHub Actions）。
+- **冷启动验证时让 subagent 重读 `course_resource/`** 是有价值的；可让 subagent 在冷启动阶段就把项目要求与课程要求做一次交叉对照。
+- **仓库命名**：本仓库 `AISE-copy` 是用户为对比实验特意创建；与 `AISE`（另一个 agent 的实现）是平行分支，文档里以后都应区分清楚。
 
 ---
 
