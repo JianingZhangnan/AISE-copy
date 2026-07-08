@@ -224,7 +224,64 @@
 
 ---
 
-## 下一步行动
+### [2026-07-08 11:50] T00 — 项目脚手架与 uv 配置
+
+**任务编号**：T00
+**Superpowers 技能**：`test-driven-development`、`executing-plans`
+**Subagent ID**：`t00-scaffolding-subagent-2026-07-08-1150`
+
+**关键 Prompt**：
+> 建立可分发的 Python 包骨架，使后续任务可立刻 `uv sync && uv run pytest` 运行。严格遵循 TDD：先写失败测试，看到红色，再写最少实现变绿，最后重构。
+
+**主要输出**：
+- 新建 `pyproject.toml`：声明 `name = "phycode"`、`version = "0.1.0"`、`requires-python = ">=3.11"`；依赖 `typer>=0.12, rich>=13, pydantic>=2, httpx>=0.27, keyring>=24, platformdirs>=4`；dev 依赖 `pytest>=8, pytest-cov, ruff, mypy`；`project.scripts` 暴露 `phycode = "phycode.cli.app:app"`；`[tool.pytest.ini_options]` 设 `testpaths = ["tests"]`、`addopts = "-ra -q"`、`pythonpath = ["src"]`
+- 新建 `src/phycode/__init__.py`：仅暴露 `__version__ = "0.1.0"`
+- 新建 `tests/__init__.py` 和 `tests/test_scaffolding.py`：包含 2 个失败用例（导入 `phycode` 验证版本号、`entry_points` 注册到 `phycode.cli.app`）
+- 新建 `README.md`：占位说明（项目简介、安装命令、`make test`、待补充章节）
+- 新建 `Makefile`：`test` / `lint` / `fmt` 三个 target，均通过 `uv run` 调用 pytest / ruff
+- 新建 `.python-version`：固定为 `3.11`
+
+**TDD 流程（红 → 绿）**：
+
+**第 1 步（RED）**：
+```
+tests/test_scaffolding.py::test_package_importable FAILED
+  ModuleNotFoundError: No module named 'phycode'
+tests/test_scaffolding.py::test_cli_entrypoint_registered FAILED
+  AssertionError: phycode console_scripts entry point not registered
+============================== 2 failed in 0.69s ==============================
+```
+
+**第 2 步（GREEN）**：实现 scaffold 文件后
+```
+collected 2 items
+tests\test_scaffolding.py ..                                             [100%]
+============================== 2 passed in 0.04s ==============================
+```
+
+**第 3 步（REFACTOR）**：
+- `ruff check .` → `All checks passed!`
+- `ruff format .` → 重新格式化 1 个文件（test_scaffolding.py）
+- `gmake test` → `uv run pytest → 2 passed`
+- `gmake lint` → `All checks passed!`
+
+**Commit Hash**：（提交后填入）
+
+**人工干预**：本次任务无需人工干预
+
+**教训与备注**：
+- **TDD 流程顺利**：先写测试、执行看到红色；再写 `pyproject.toml` 和 `src/phycode/__init__.py` 变绿。两个测试一开始就 FAILED（`import phycode` 模块未注册、`entry_points` 未注册），符合预期。
+- **entry_points 的特殊处理**：测试通过 `ep.value.startswith("phycode.cli.app")` 校验 entry point 路径正确性，而不是 `ep.load()`，因为 `phycode.cli.app` 模块还不存在（T13 才创建）。这避免了测试对未实现模块的耦合。
+- **Windows 环境注意**：
+  - 系统默认 Python 是 3.12.7（Anaconda），但 `uv sync` 创建 `.venv` 使用 Python 3.11.12。需要用 `uv run pytest`（自动使用 `.venv`）才能正确运行测试。
+  - dev 依赖通过 `uv sync --extra dev` 安装（`pytest`, `ruff`, `mypy`, `pytest-cov` 在 `[project.optional-dependencies]` 的 `dev` 分组下）。
+  - `make` 在 Windows PowerShell 中不存在；用户机器上 `gmake.exe` 在 `D:\strawberry\c\bin\`，可用 `gmake test` 调用。后续 CI 使用 GitHub Actions 标准 `make` 即可。
+  - git 自动 LF→CRLF 警告是 Windows 上的正常现象，可忽略。
+- **项目命名澄清**：本地目录为 `AISE - Copy`，但 PyPI 包名为 `phycode`（符合课程要求）。后续发布到 PyPI 时包名为 `phycode`，用户通过 `uvx phycode` 或 `pip install phycode` 安装。
+- **CI 兼容性**：pyproject.toml 使用 `hatchling` 作为 build backend（hatch 是 uv 默认推荐），与 uv 兼容性最好。
+- **下个任务**：T01（核心数据模型 Pydantic），由独立 subagent 在 worktree 中执行。
+
+---
 
 根据 CLAUDE.md 的七步工作流，当前已完成：
 1. ✅ `brainstorming`

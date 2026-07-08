@@ -1,0 +1,3 @@
+"""PhyCode: Policy-Aware Coding Agent Harness."""
+
+__version__ = "0.1.0"
