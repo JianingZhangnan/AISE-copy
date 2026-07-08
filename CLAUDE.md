@@ -91,3 +91,44 @@ Superpowers 本地资源在 `.local\superpowers`；使用前先阅读 `.local\su
 
 - 项目文档（SPEC.md、PLAN.md、SPEC_PROCESS.md、AGENT_LOG.md、README.md 等）：**中文**
 - 代码注释和 commit message：**英文**
+
+---
+
+## Windows 环境注意事项
+
+### 文件编码
+
+Write/StrReplace 工具在 Windows 上默认写 UTF-16-LE（含 null bytes），会导致 Python AST 解析失败（`SyntaxError: source code string cannot contain null bytes`）。**写 .py 文件后必须用 Python 脚本验证编码**：
+
+```python
+data = open(path, 'rb').read()
+assert b'\x00' not in data, f"{path} has null bytes (UTF-16-LE)"
+```
+
+如文件已损坏，用 Python 清理：`content = open(path, 'rb').read().replace(b'\x00', b''); open(path, 'wb').write(content)`。
+
+### Shell 命令
+
+- `make` 不存在，用 `uv run pytest` / `uv run ruff` 直接调用
+- PowerShell heredoc 语法（`<<'EOF'`）**不支持**，多行字符串用 Python 脚本
+- `&&` 和 `;` 在 PowerShell 中的行为与 bash 不同，用多条 Shell 命令串行执行
+
+### Git
+
+- `git checkout master` 在 worktree 环境中会失败（master 分支已被当前 worktree 使用）
+- 始终用 `git branch -v` 确认当前分支后再 merge
+- untracked 文件不受 git merge 保护，`rm` 前先 `git ls-files --stage <path>` 确认
+
+### AGENT_LOG.md 工作约定
+
+每个 task 完成后：
+1. subagent 在 worktree 中将日志写入独立文件（如 `_agent_log_entry.md`）
+2. 父 agent 在 master 分支上 append 到 AGENT_LOG.md，避免 merge 冲突
+3. 合并多个 worktree 时，先确认 AGENT_LOG.md 的冲突区域，保留两份 task 日志
+
+---
+
+## 相关 Skills
+
+- `.cursor/skills/safe-worktree/SKILL.md` — Git worktree 安全操作规范
+- `.cursor/skills/windows-tooling/SKILL.md` — Windows 文件编码与工具注意事项
