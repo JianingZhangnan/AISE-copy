@@ -330,7 +330,83 @@ tests/test_events_models.py ...............................  [100%]
 
 ---
 
+<<<<<<< HEAD
 ### [2026-07-08 14:13] T02 — 文件系统与工作区解析工具函数
+
+**任务编号**：T02
+**Superpowers 技能**：`test-driven-development`、`executing-plans`
+
+**主要输出**：
+- 新建 `src/phycode/errors.py`：`PhyCodeError` 基类 + `PathEscapeError` 子类
+- 新建 `src/phycode/paths.py`：实现路径安全操作的 4 个核心函数：
+  - `resolve_workspace_path(root, requested)`：解析相对/绝对路径，处理 `..`/`.`，标准化分隔符
+  - `is_within_allowed(root, candidate, allowlist)`：检查路径是否在根目录或白名单内
+  - `symlink_escape(root, candidate)`：检测符号链接是否逃逸到根目录外
+  - `safe_join(root, *parts)`：安全拼接路径，拒绝绝对路径和逃逸路径
+- 新建 `tests/test_paths.py`：14 个测试用例
+
+**Commit Hash**：`d0cc83d`
+
+**教训与备注**：
+- **Windows symlink 限制**：Windows 上创建 symlink 需要管理员或开发者模式，测试用 `pytest.skip` 优雅降级。
+- **resolve(strict=False)**：Windows 上某些路径的 `resolve()` 会抛 OSError，用 `strict=False` 保证健壮性。
+- **ruff UP035**：`Iterable` 从 `collections.abc` 导入（Python 3.9+）。
+
+---
+
+### [2026-07-08 14:22] T03 — 配置加载（`phycode.toml` + 用户配置目录）
+
+**任务编号**：T03
+**Superpowers 技能**：`test-driven-development`、`executing-plans`
+
+**主要输出**：
+- 新建 `src/phycode/config/__init__.py`：导出全部 6 个公开符号
+- 新建 `src/phycode/config/models.py`：`UserConfig` 和 `ProjectConfig` Pydantic 模型
+- 新建 `src/phycode/config/loader.py`：`load_project_config()` 和 `load_user_config()`，支持 TOML 解析、未知字段警告、Pydantic 校验
+- 新建 `tests/test_config_loader.py`：8 个测试用例
+- 新建 `tests/fixtures/phycode_minimal.toml`：测试固件
+
+**Commit Hash**：`5fcfc9d`
+
+**教训与备注**：
+- **Pydantic v2 API**：使用 `model_fields.keys()` 获取字段名集合（v2 FieldInfo 对象没有 `.name` 属性）
+- **Python 3.11+ 内置 tomllib**：无需 tomli 回退
+- **frozen=True + extra="allow"**：不可变配置 + 接受扩展字段
+- **未知字段警告机制**：不在 model_fields 中的键记录 warning 但不抛异常
+
+---
+
+根据 CLAUDE.md 的七步工作流，当前已完成：
+1. ✅ `brainstorming`
+2. ✅ `writing-plans`
+3. ✅ `cold-start-validation`（冷启动验证）
+4. ✅ `P0-fixes`（修复关键文档问题）
+5. ✅ `T00` — 项目脚手架与 uv 配置（`488cf37`）
+6. ✅ `T01` — 核心数据模型（`24558fd`）
+7. ✅ `T02` — 文件系统与工作区工具（`d0cc83d`）
+8. ✅ `T03` — 配置加载器（`5fcfc9d`）
+
+**阶段门禁检查**：
+- ✅ SPEC.md 已完成
+- ✅ PLAN.md 已完成
+- ✅ SPEC_PROCESS.md 已完成
+- ✅ AGENT_LOG.md 已完成
+- ✅ 冷启动验证已通过（发现并修复 7 项 P0 问题）
+- ✅ T00 完成（`488cf37`）
+- ✅ T01 完成（`24558fd`）
+- ✅ T02 完成（`d0cc83d`）
+- ✅ T03 完成（`5fcfc9d`）
+
+---
+
+## 待办事项
+
+1. ✅ 执行 T02：文件系统与工作区解析工具函数（`d0cc83d`）
+2. ✅ 执行 T03：配置加载（`5fcfc9d`）
+3. ⏭ 执行 T04：策略引擎（深度维度核心）
+4. ⏭ 执行 T05：反馈分类器
+5. ⏭ 执行 T06：工具注册表与运行时
+6. ⏭ 后续按 PLAN.md 依次执行 T07-T16
 
 **任务编号**：T02
 **Superpowers 技能**：`test-driven-development`、`executing-plans`
@@ -347,11 +423,26 @@ tests/test_events_models.py ...............................  [100%]
   - `symlink_escape(root, candidate)`：检测符号链接是否逃逸到根目录外
   - `safe_join(root, *parts)`：安全拼接路径，reject 绝对路径和逃逸路径
 - 新建 `tests/test_paths.py`：14 个测试用例覆盖上述所有函数
+=======
+### [2026-07-08 14:22] T03 — 配置加载（`phycode.toml` + 用户配置目录）
+
+**任务编号**：T03
+**Superpowers 技能**：`test-driven-development`、`executing-plans`
+
+**主要输出**：
+- 新建 `src/phycode/errors.py`：定义 `PhyCodeError` 基类和 `ConfigError` 子类
+- 新建 `src/phycode/config/__init__.py`：导出全部 6 个公开符号
+- 新建 `src/phycode/config/models.py`：定义 `UserConfig` 和 `ProjectConfig` Pydantic 模型
+- 新建 `src/phycode/config/loader.py`：实现 `load_project_config()` 和 `load_user_config()`，支持 TOML 解析、未知字段警告、Pydantic 验证
+- 新建 `tests/test_config_loader.py`：8 个测试用例覆盖所有配置加载场景
+- 新建 `tests/fixtures/phycode_minimal.toml`：测试固件
+>>>>>>> feat/T03-config
 
 **TDD 流程（红 → 绿）**：
 
 **第 1 步（RED）**：
 ```
+<<<<<<< HEAD
 ModuleNotFoundError: No module named 'phycode.paths'
 ```
 确认测试收集失败，红色状态正确。
@@ -369,15 +460,41 @@ tests/test_paths.py ......sss.....                                       [100%]
 - `uv run ruff check src/phycode/paths.py src/phycode/errors.py` → `All checks passed!`
 
 **Commit Hash**：`d0cc83d`（短哈希，完整 `d0cc83d4a...`）
+=======
+ModuleNotFoundError: No module named 'phycode.config'
+```
+确认测试收集失败，红色状态正确。
+
+**第 2 步（GREEN）**：创建 config 模块后
+```
+tests/test_config_loader.py ........                                     [100%]
+============================== 8 passed in 0.27s ==============================
+```
+全部 8 个测试通过。
+
+**第 3 步（REFACTOR）**：
+- `ruff check --fix src/phycode/config/ src/phycode/errors.py` → 自动修复 import 排序问题
+- `ruff format src/phycode/config/ src/phycode/errors.py` → 4 个文件格式化
+- `uv run ruff check src/phycode/config/ src/phycode/errors.py` → `All checks passed!`
+
+**Commit Hash**：`5fcfc9d`
+>>>>>>> feat/T03-config
 
 **人工干预**：无
 
 **教训与备注**：
+<<<<<<< HEAD
 - **Windows symlink 限制**：在 Windows 上创建 symlink 需要管理员权限或开发者模式，测试用 `pytest.skip` 优雅降级，不阻塞 CI。
 - **Python 版本兼容**：`is_relative_to()` 是 Python 3.9+ 的 Path 方法，所有受支持版本（3.11+）均有此方法。
 - **resolve(strict=False) 模式**：在 Windows 上某些路径的 `resolve()` 会抛 OSError，使用 `strict=False` 模式保证健壮性。
 - **PathEscapeError 属性**：携带 `requested` 和 `root` 属性，方便调用方诊断路径逃逸原因。
 - **ruff UP035 警告**：`Iterable` 应从 `collections.abc` 导入而非 `typing`（Python 3.9+）。
+=======
+- **Pydantic v2 API**：使用 `model_fields.keys()` 获取字段名集合，而不是 `{f.name for f in model_fields.values()}`（v2 FieldInfo 对象没有 `.name` 属性）
+- **Python 3.11+ 内置 tomllib**：uv 环境使用 Python 3.11+，直接 `import tomllib` 即可，无需 tomli 回退
+- **frozen=True + extra="allow"**：UserConfig 和 ProjectConfig 使用 `frozen=True` 保证不可变性，`extra="allow"` 接受扩展字段
+- **未知字段警告机制**：load_project_config() 遍历 TOML 解析结果，对不在 model_fields 中的键记录 warning，但不抛出异常
+>>>>>>> feat/T03-config
 
 ---
 
@@ -388,11 +505,16 @@ tests/test_paths.py ......sss.....                                       [100%]
 4. ✅ `P0-fixes`（修复关键文档问题）
 5. ✅ `T00` — 项目脚手架与 uv 配置（`488cf37`）
 6. ✅ `T01` — 核心数据模型（`24558fd`）
+7. ✅ `T03` — 配置加载器（`5fcfc9d`）
 
 9. ✅ `T02` — 文件系统与工作区工具（`d0cc83d`）
 
 接下来应该：
+<<<<<<< HEAD
 5. ⏭ 执行 T03/T04 等下一批任务
+=======
+5. ⏭ 执行 T02/T04 等下一批任务
+>>>>>>> feat/T03-config
 6. ⏭ `subagent-driven-development` — 每个任务严格遵循 TDD
 
 **阶段门禁检查**：
@@ -403,13 +525,23 @@ tests/test_paths.py ......sss.....                                       [100%]
 - ✅ 冷启动验证已通过（发现并修复 7 项 P0 问题）
 - ✅ T00 完成（`488cf37`）
 - ✅ T01 完成（`24558fd`）
+<<<<<<< HEAD
 - ✅ T02 完成（`d0cc83d`）
+=======
+- ✅ T03 完成（`5fcfc9d`）
+>>>>>>> feat/T03-config
 
 ---
 
 ## 待办事项
 
+<<<<<<< HEAD
 1. ✅ 执行 T02：文件系统与工作区解析工具函数（`d0cc83d`）
 2. ⏭ 执行 T03：配置加载（`phycode.toml` + 用户配置目录）
 3. ⏭ 执行 T04：策略引擎（深度维度核心）
 4. ⏭ 后续按 PLAN.md 依次执行 T05-T16
+=======
+1. ⏭ 执行 T02：文件系统与工作区解析工具函数
+2. ⏭ 执行 T04：策略引擎（深度维度核心）
+3. ⏭ 后续按 PLAN.md 依次执行 T05-T16
+>>>>>>> feat/T03-config

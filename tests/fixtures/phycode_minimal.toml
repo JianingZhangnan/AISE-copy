@@ -1,0 +1,4 @@
+workspace_root = "/tmp/test"
+test_command = "uv run pytest"
+enabled_tools = ["bash", "read_file", "write_file"]
+allowlist = ["/tmp/test"]
