@@ -330,6 +330,51 @@ tests/test_events_models.py ...............................  [100%]
 
 ---
 
+### [2026-07-08 14:22] T03 — 配置加载（`phycode.toml` + 用户配置目录）
+
+**任务编号**：T03
+**Superpowers 技能**：`test-driven-development`、`executing-plans`
+
+**主要输出**：
+- 新建 `src/phycode/errors.py`：定义 `PhyCodeError` 基类和 `ConfigError` 子类
+- 新建 `src/phycode/config/__init__.py`：导出全部 6 个公开符号
+- 新建 `src/phycode/config/models.py`：定义 `UserConfig` 和 `ProjectConfig` Pydantic 模型
+- 新建 `src/phycode/config/loader.py`：实现 `load_project_config()` 和 `load_user_config()`，支持 TOML 解析、未知字段警告、Pydantic 验证
+- 新建 `tests/test_config_loader.py`：8 个测试用例覆盖所有配置加载场景
+- 新建 `tests/fixtures/phycode_minimal.toml`：测试固件
+
+**TDD 流程（红 → 绿）**：
+
+**第 1 步（RED）**：
+```
+ModuleNotFoundError: No module named 'phycode.config'
+```
+确认测试收集失败，红色状态正确。
+
+**第 2 步（GREEN）**：创建 config 模块后
+```
+tests/test_config_loader.py ........                                     [100%]
+============================== 8 passed in 0.27s ==============================
+```
+全部 8 个测试通过。
+
+**第 3 步（REFACTOR）**：
+- `ruff check --fix src/phycode/config/ src/phycode/errors.py` → 自动修复 import 排序问题
+- `ruff format src/phycode/config/ src/phycode/errors.py` → 4 个文件格式化
+- `uv run ruff check src/phycode/config/ src/phycode/errors.py` → `All checks passed!`
+
+**Commit Hash**：`5fcfc9d`
+
+**人工干预**：无
+
+**教训与备注**：
+- **Pydantic v2 API**：使用 `model_fields.keys()` 获取字段名集合，而不是 `{f.name for f in model_fields.values()}`（v2 FieldInfo 对象没有 `.name` 属性）
+- **Python 3.11+ 内置 tomllib**：uv 环境使用 Python 3.11+，直接 `import tomllib` 即可，无需 tomli 回退
+- **frozen=True + extra="allow"**：UserConfig 和 ProjectConfig 使用 `frozen=True` 保证不可变性，`extra="allow"` 接受扩展字段
+- **未知字段警告机制**：load_project_config() 遍历 TOML 解析结果，对不在 model_fields 中的键记录 warning，但不抛出异常
+
+---
+
 根据 CLAUDE.md 的七步工作流，当前已完成：
 1. ✅ `brainstorming`
 2. ✅ `writing-plans`
@@ -337,9 +382,10 @@ tests/test_events_models.py ...............................  [100%]
 4. ✅ `P0-fixes`（修复关键文档问题）
 5. ✅ `T00` — 项目脚手架与 uv 配置（`488cf37`）
 6. ✅ `T01` — 核心数据模型（`24558fd`）
+7. ✅ `T03` — 配置加载器（`5fcfc9d`）
 
 接下来应该：
-5. ⏭ 执行 T02/T03/T04 等下一批任务
+5. ⏭ 执行 T02/T04 等下一批任务
 6. ⏭ `subagent-driven-development` — 每个任务严格遵循 TDD
 
 **阶段门禁检查**：
@@ -350,12 +396,12 @@ tests/test_events_models.py ...............................  [100%]
 - ✅ 冷启动验证已通过（发现并修复 7 项 P0 问题）
 - ✅ T00 完成（`488cf37`）
 - ✅ T01 完成（`24558fd`）
+- ✅ T03 完成（`5fcfc9d`）
 
 ---
 
 ## 待办事项
 
 1. ⏭ 执行 T02：文件系统与工作区解析工具函数
-2. ⏭ 执行 T03：配置加载（`phycode.toml` + 用户配置目录）
-3. ⏭ 执行 T04：策略引擎（深度维度核心）
-4. ⏭ 后续按 PLAN.md 依次执行 T05-T16
+2. ⏭ 执行 T04：策略引擎（深度维度核心）
+3. ⏭ 后续按 PLAN.md 依次执行 T05-T16
