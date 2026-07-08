@@ -144,6 +144,49 @@
 
 ---
 
+### [2026-07-08 11:17] Git 仓库初始化
+
+**操作**：
+- 在 `d:\cs\AISE - Copy` 目录初始化本地 git 仓库
+- 配置本地用户：`PhyCode Developer <phycode@example.com>`
+- 扩展 `.gitignore` 覆盖 Python、构建产物、本地状态、IDE 文件
+- 提交初始文档：`9db1c04 Initial: SPEC, PLAN, process docs and course resources`
+
+**Commit Hash**：`9db1c04`
+
+**包含文件**：
+- `SPEC.md`、`PLAN.md`、`SPEC_PROCESS.md`、`AGENT_LOG.md`、`CLAUDE.md`
+- `.gitignore`
+- `course_resource/`（课程原始资料）
+- `docs/superpowers/specs/`（brainstorming 设计笔记）
+
+**关于 GitHub 仓库**：
+- 暂未推送到 GitHub，因为需要用户提供以下信息：
+  - GitHub 用户名/组织名
+  - Personal Access Token (PAT)
+  - 目标仓库名（CLAUDE.md 提到 `JianingZhangnan/AISE`）
+- 创建 GitHub 仓库的步骤：
+  1. 用户在 GitHub 上创建空仓库（不要初始化 README/.gitignore）
+  2. 提供 Personal Access Token（需要 `repo` 权限）
+  3. 添加远程源：`git remote add origin https://github.com/<user>/<repo>.git`
+  4. 推送：`git push -u origin master`
+
+**关于 CI/CD**：
+- 课程明确要求 `.gitlab-ci.yml` 必须包含名为 `unit-test` 的 job
+- CLAUDE.md §5.10 允许添加 GitHub Actions 但不取代 GitLab CI
+- 推荐设置：
+  - **GitLab CI**（必需）：`.gitlab-ci.yml` — 课程作业提交平台（如果用 NJU Git）
+  - **GitHub Actions**（推荐）：`.github/workflows/ci.yml` — 当前开发平台使用
+- CI 配置文件将在 T15 任务中创建
+
+**人工干预**：用户提供 GitHub 凭证后才能推送
+
+**教训与备注**：
+- 本地 git 仓库是 GitHub 仓库的源，迁移到 NJU Git 时只需镜像
+- CI 配置文件必须在 T15 任务中创建，不能提前添加（避免在脚手架不完整时 CI 失败）
+
+---
+
 ### [2026-07-08 10:15] 修复 P0 级别文档问题
 
 **Subagent ID**：`044261f7-867b-4bf8-988a-4705a81f4abc`
