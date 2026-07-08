@@ -265,7 +265,7 @@ tests\test_scaffolding.py ..                                             [100%]
 - `gmake test` → `uv run pytest → 2 passed`
 - `gmake lint` → `All checks passed!`
 
-**Commit Hash**：（提交后填入）
+**Commit Hash**：`488cf37`（短哈希，完整 `488cf3708216bc2be0b92afc78bdfe378ff89081`）
 
 **人工干预**：本次任务无需人工干预
 
