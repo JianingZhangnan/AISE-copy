@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Distribution / build
+dist/
+build/
+*.egg-info/
+*.egg
+
+# Local secrets and runtime state
+.env
+.env.*
+*.log
+.superpowers/
+.phycode/
+.uv-cache/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.cursor/
+
+# Test artifacts
+.coverage
+htmlcov/
+*.cover
