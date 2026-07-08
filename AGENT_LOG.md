@@ -330,6 +330,57 @@ tests/test_events_models.py ...............................  [100%]
 
 ---
 
+### [2026-07-08 14:13] T02 — 文件系统与工作区解析工具函数
+
+**任务编号**：T02
+**Superpowers 技能**：`test-driven-development`、`executing-plans`
+
+**关键 Prompt**：
+> 实现 `src/phycode/paths.py`，包含 resolve_workspace_path、is_within_allowed、symlink_escape、safe_join 等原子操作。先确认 RED（测试失败），再写最少实现变绿，最后重构。
+
+**主要输出**：
+- 新建 `src/phycode/errors.py`：`PhyCodeError` 基类
+- 新建 `src/phycode/paths.py`：实现路径安全操作的 4 个核心函数：
+  - `PathEscapeError`：路径逃逸异常，继承 `PhyCodeError`
+  - `resolve_workspace_path(root, requested)`：解析相对/绝对路径，处理 `..`/`.`，标准化分隔符
+  - `is_within_allowed(root, candidate, allowlist)`：检查路径是否在根目录或白名单内
+  - `symlink_escape(root, candidate)`：检测符号链接是否逃逸到根目录外
+  - `safe_join(root, *parts)`：安全拼接路径，reject 绝对路径和逃逸路径
+- 新建 `tests/test_paths.py`：14 个测试用例覆盖上述所有函数
+
+**TDD 流程（红 → 绿）**：
+
+**第 1 步（RED）**：
+```
+ModuleNotFoundError: No module named 'phycode.paths'
+```
+确认测试收集失败，红色状态正确。
+
+**第 2 步（GREEN）**：创建 `src/phycode/paths.py` 和 `src/phycode/errors.py` 后
+```
+tests/test_paths.py ......sss.....                                       [100%]
+======================== 11 passed, 3 skipped in 0.13s ========================
+```
+3 个 symlink 相关测试在 Windows 上跳过（symlink 支持受限），其余 11 个全部通过。
+
+**第 3 步（REFACTOR）**：
+- `ruff check --fix src/phycode/paths.py src/phycode/errors.py` → 修复 import 顺序（`Iterable` 从 `typing` 迁至 `collections.abc`）
+- `ruff format src/phycode/paths.py src/phycode/errors.py` → 格式化 2 个文件
+- `uv run ruff check src/phycode/paths.py src/phycode/errors.py` → `All checks passed!`
+
+**Commit Hash**：`d0cc83d`（短哈希，完整 `d0cc83d4a...`）
+
+**人工干预**：无
+
+**教训与备注**：
+- **Windows symlink 限制**：在 Windows 上创建 symlink 需要管理员权限或开发者模式，测试用 `pytest.skip` 优雅降级，不阻塞 CI。
+- **Python 版本兼容**：`is_relative_to()` 是 Python 3.9+ 的 Path 方法，所有受支持版本（3.11+）均有此方法。
+- **resolve(strict=False) 模式**：在 Windows 上某些路径的 `resolve()` 会抛 OSError，使用 `strict=False` 模式保证健壮性。
+- **PathEscapeError 属性**：携带 `requested` 和 `root` 属性，方便调用方诊断路径逃逸原因。
+- **ruff UP035 警告**：`Iterable` 应从 `collections.abc` 导入而非 `typing`（Python 3.9+）。
+
+---
+
 根据 CLAUDE.md 的七步工作流，当前已完成：
 1. ✅ `brainstorming`
 2. ✅ `writing-plans`
@@ -338,8 +389,10 @@ tests/test_events_models.py ...............................  [100%]
 5. ✅ `T00` — 项目脚手架与 uv 配置（`488cf37`）
 6. ✅ `T01` — 核心数据模型（`24558fd`）
 
+9. ✅ `T02` — 文件系统与工作区工具（`d0cc83d`）
+
 接下来应该：
-5. ⏭ 执行 T02/T03/T04 等下一批任务
+5. ⏭ 执行 T03/T04 等下一批任务
 6. ⏭ `subagent-driven-development` — 每个任务严格遵循 TDD
 
 **阶段门禁检查**：
@@ -350,12 +403,13 @@ tests/test_events_models.py ...............................  [100%]
 - ✅ 冷启动验证已通过（发现并修复 7 项 P0 问题）
 - ✅ T00 完成（`488cf37`）
 - ✅ T01 完成（`24558fd`）
+- ✅ T02 完成（`d0cc83d`）
 
 ---
 
 ## 待办事项
 
-1. ⏭ 执行 T02：文件系统与工作区解析工具函数
+1. ✅ 执行 T02：文件系统与工作区解析工具函数（`d0cc83d`）
 2. ⏭ 执行 T03：配置加载（`phycode.toml` + 用户配置目录）
 3. ⏭ 执行 T04：策略引擎（深度维度核心）
 4. ⏭ 后续按 PLAN.md 依次执行 T05-T16
