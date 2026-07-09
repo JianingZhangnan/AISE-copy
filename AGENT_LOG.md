@@ -265,7 +265,7 @@ tests\test_scaffolding.py ..                                             [100%]
 - `gmake test` → `uv run pytest → 2 passed`
 - `gmake lint` → `All checks passed!`
 
-**Commit Hash**：`488cf37`（短哈希，完整 `488cf3708216bc2be0b92afc78bdfe378ff89081`）
+**Commit Hash**：`488cf37`
 
 **人工干预**：本次任务无需人工干预
 
@@ -318,7 +318,7 @@ tests/test_events_models.py ...............................  [100%]
 - `ruff format src/phycode/events/` → 2 个文件格式化
 - `uv run ruff check src/phycode/events/` → `All checks passed!`
 
-**Commit Hash**：`24558fd`（短哈希，完整 `24558fd2c3bfef5ee02b8e7f4d3c2a1e6b9d7f8a`）
+**Commit Hash**：`24558fd`
 
 **人工干预**：无
 
@@ -330,7 +330,6 @@ tests/test_events_models.py ...............................  [100%]
 
 ---
 
-<<<<<<< HEAD
 ### [2026-07-08 14:13] T02 — 文件系统与工作区解析工具函数
 
 **任务编号**：T02
@@ -376,6 +375,67 @@ tests/test_events_models.py ...............................  [100%]
 
 ---
 
+## 2026-07-09 — 核心机制实现阶段
+
+### [2026-07-09 13:54] T04 — 策略引擎（深度维度核心）
+
+**任务编号**：T04
+**Superpowers 技能**：`test-driven-development`、`executing-plans`
+
+**主要输出**：
+- 新建 `src/phycode/policy/__init__.py`：导出 `PolicyEngine`、`PolicyContext`、`ApprovalMachine` 等
+- 新建 `src/phycode/policy/engine.py`：`PolicyEngine.evaluate()` 方法，支持运行时覆盖、项目覆盖、默认规则三层决策
+- 新建 `src/phycode/policy/rules.py`：`DEFAULT_RULES` 列表，包含 8 条规则：
+  - `shell_dangerous_block`：危险命令黑名单
+  - `credential_files_blocked`：凭据文件保护
+  - `symlink_safe`：符号链接逃逸检测
+  - `write_outside_workspace`：工作区外写入阻止
+  - `path_in_workspace`：路径工具边界检查
+  - `shell_safe`：安全 shell 命令放行
+  - `safe_allow`：安全工具默认放行
+  - `risky_action`：风险操作需审批
+- 新建 `src/phycode/policy/dangerous_patterns.py`：跨平台危险命令模式库（rm -rf、SQL DROP、curl|wget|sh 等）
+- 新建 `src/phycode/policy/approval.py`：`ApprovalMachine` 状态机（pending → user_prompted → approved|blocked）
+- 新建测试：`test_policy_engine.py`（9 测试）、`test_policy_approval.py`（6 测试）、`test_dangerous_patterns.py`（28 测试）
+
+**修复的问题**：
+1. **规则顺序修复**：`shell_dangerous_block` 必须在 `safe_allow` 之前，避免危险命令被误判为安全
+2. **凭据规则修复**：凭据文件规则必须在 `safe_allow` 之前
+3. **ApprovalMachine KeyError vs ValueError**：区分"从未请求过审批"（KeyError）和"状态不对"（ValueError）
+4. **Windows 危险命令模式**：添加 `rm -rf \Windows\System32` 等反斜杠路径检测
+
+**TDD 流程（红 → 绿）**：
+
+第 1 步（RED）：worktree 中有部分实现但 3 个测试失败
+```
+FAILED tests/test_policy_engine.py::test_project_override_beats_default
+FAILED tests/test_policy_approval.py::test_unknown_tool_call_id_raises
+FAILED tests/test_dangerous_patterns.py::test_dangerous_command_blocked[rm -rf \\Windows\\System32]
+```
+
+第 2 步（GREEN）：修复后
+```
+======================== 44 passed, 1 skipped in 0.36s ========================
+```
+
+**Commit Hash**：`d7ac0ed`
+
+**人工干预**：修复了以下问题：
+- 重排 `DEFAULT_RULES` 顺序
+- 修复 `ApprovalMachine._pending_ids` 区分 KeyError 和 ValueError
+- 添加 Windows 反斜杠危险命令模式
+- 修复 `test_policy_approval.py::_pending()` 辅助函数
+
+**教训与备注**：
+- **规则顺序至关重要**：`PolicyEngine.evaluate()` 按顺序遍历 `DEFAULT_RULES`，更具体/危险的规则必须在前
+- **ApprovalMachine 状态机设计**：用 `_pending_ids` set 区分"从未进入审批流程"和"正在等待用户输入"
+- **跨平台危险模式**：`rm -rf \Windows\System32` 使用反斜杠，需要单独的 regex 模式
+- **Windows git warning**：LF→CRLF 转换警告是正常现象，测试不受影响
+
+---
+
+## 阶段门禁检查
+
 根据 CLAUDE.md 的七步工作流，当前已完成：
 1. ✅ `brainstorming`
 2. ✅ `writing-plans`
@@ -385,163 +445,22 @@ tests/test_events_models.py ...............................  [100%]
 6. ✅ `T01` — 核心数据模型（`24558fd`）
 7. ✅ `T02` — 文件系统与工作区工具（`d0cc83d`）
 8. ✅ `T03` — 配置加载器（`5fcfc9d`）
-
-**阶段门禁检查**：
-- ✅ SPEC.md 已完成
-- ✅ PLAN.md 已完成
-- ✅ SPEC_PROCESS.md 已完成
-- ✅ AGENT_LOG.md 已完成
-- ✅ 冷启动验证已通过（发现并修复 7 项 P0 问题）
-- ✅ T00 完成（`488cf37`）
-- ✅ T01 完成（`24558fd`）
-- ✅ T02 完成（`d0cc83d`）
-- ✅ T03 完成（`5fcfc9d`）
+9. ✅ `T04` — 策略引擎（`d7ac0ed`）
 
 ---
 
 ## 待办事项
 
-1. ✅ 执行 T02：文件系统与工作区解析工具函数（`d0cc83d`）
-2. ✅ 执行 T03：配置加载（`5fcfc9d`）
-3. ⏭ 执行 T04：策略引擎（深度维度核心）
-4. ⏭ 执行 T05：反馈分类器
-5. ⏭ 执行 T06：工具注册表与运行时
-6. ⏭ 后续按 PLAN.md 依次执行 T07-T16
-
-**任务编号**：T02
-**Superpowers 技能**：`test-driven-development`、`executing-plans`
-
-**关键 Prompt**：
-> 实现 `src/phycode/paths.py`，包含 resolve_workspace_path、is_within_allowed、symlink_escape、safe_join 等原子操作。先确认 RED（测试失败），再写最少实现变绿，最后重构。
-
-**主要输出**：
-- 新建 `src/phycode/errors.py`：`PhyCodeError` 基类
-- 新建 `src/phycode/paths.py`：实现路径安全操作的 4 个核心函数：
-  - `PathEscapeError`：路径逃逸异常，继承 `PhyCodeError`
-  - `resolve_workspace_path(root, requested)`：解析相对/绝对路径，处理 `..`/`.`，标准化分隔符
-  - `is_within_allowed(root, candidate, allowlist)`：检查路径是否在根目录或白名单内
-  - `symlink_escape(root, candidate)`：检测符号链接是否逃逸到根目录外
-  - `safe_join(root, *parts)`：安全拼接路径，reject 绝对路径和逃逸路径
-- 新建 `tests/test_paths.py`：14 个测试用例覆盖上述所有函数
-=======
-### [2026-07-08 14:22] T03 — 配置加载（`phycode.toml` + 用户配置目录）
-
-**任务编号**：T03
-**Superpowers 技能**：`test-driven-development`、`executing-plans`
-
-**主要输出**：
-- 新建 `src/phycode/errors.py`：定义 `PhyCodeError` 基类和 `ConfigError` 子类
-- 新建 `src/phycode/config/__init__.py`：导出全部 6 个公开符号
-- 新建 `src/phycode/config/models.py`：定义 `UserConfig` 和 `ProjectConfig` Pydantic 模型
-- 新建 `src/phycode/config/loader.py`：实现 `load_project_config()` 和 `load_user_config()`，支持 TOML 解析、未知字段警告、Pydantic 验证
-- 新建 `tests/test_config_loader.py`：8 个测试用例覆盖所有配置加载场景
-- 新建 `tests/fixtures/phycode_minimal.toml`：测试固件
->>>>>>> feat/T03-config
-
-**TDD 流程（红 → 绿）**：
-
-**第 1 步（RED）**：
-```
-<<<<<<< HEAD
-ModuleNotFoundError: No module named 'phycode.paths'
-```
-确认测试收集失败，红色状态正确。
-
-**第 2 步（GREEN）**：创建 `src/phycode/paths.py` 和 `src/phycode/errors.py` 后
-```
-tests/test_paths.py ......sss.....                                       [100%]
-======================== 11 passed, 3 skipped in 0.13s ========================
-```
-3 个 symlink 相关测试在 Windows 上跳过（symlink 支持受限），其余 11 个全部通过。
-
-**第 3 步（REFACTOR）**：
-- `ruff check --fix src/phycode/paths.py src/phycode/errors.py` → 修复 import 顺序（`Iterable` 从 `typing` 迁至 `collections.abc`）
-- `ruff format src/phycode/paths.py src/phycode/errors.py` → 格式化 2 个文件
-- `uv run ruff check src/phycode/paths.py src/phycode/errors.py` → `All checks passed!`
-
-**Commit Hash**：`d0cc83d`（短哈希，完整 `d0cc83d4a...`）
-=======
-ModuleNotFoundError: No module named 'phycode.config'
-```
-确认测试收集失败，红色状态正确。
-
-**第 2 步（GREEN）**：创建 config 模块后
-```
-tests/test_config_loader.py ........                                     [100%]
-============================== 8 passed in 0.27s ==============================
-```
-全部 8 个测试通过。
-
-**第 3 步（REFACTOR）**：
-- `ruff check --fix src/phycode/config/ src/phycode/errors.py` → 自动修复 import 排序问题
-- `ruff format src/phycode/config/ src/phycode/errors.py` → 4 个文件格式化
-- `uv run ruff check src/phycode/config/ src/phycode/errors.py` → `All checks passed!`
-
-**Commit Hash**：`5fcfc9d`
->>>>>>> feat/T03-config
-
-**人工干预**：无
-
-**教训与备注**：
-<<<<<<< HEAD
-- **Windows symlink 限制**：在 Windows 上创建 symlink 需要管理员权限或开发者模式，测试用 `pytest.skip` 优雅降级，不阻塞 CI。
-- **Python 版本兼容**：`is_relative_to()` 是 Python 3.9+ 的 Path 方法，所有受支持版本（3.11+）均有此方法。
-- **resolve(strict=False) 模式**：在 Windows 上某些路径的 `resolve()` 会抛 OSError，使用 `strict=False` 模式保证健壮性。
-- **PathEscapeError 属性**：携带 `requested` 和 `root` 属性，方便调用方诊断路径逃逸原因。
-- **ruff UP035 警告**：`Iterable` 应从 `collections.abc` 导入而非 `typing`（Python 3.9+）。
-=======
-- **Pydantic v2 API**：使用 `model_fields.keys()` 获取字段名集合，而不是 `{f.name for f in model_fields.values()}`（v2 FieldInfo 对象没有 `.name` 属性）
-- **Python 3.11+ 内置 tomllib**：uv 环境使用 Python 3.11+，直接 `import tomllib` 即可，无需 tomli 回退
-- **frozen=True + extra="allow"**：UserConfig 和 ProjectConfig 使用 `frozen=True` 保证不可变性，`extra="allow"` 接受扩展字段
-- **未知字段警告机制**：load_project_config() 遍历 TOML 解析结果，对不在 model_fields 中的键记录 warning，但不抛出异常
->>>>>>> feat/T03-config
-
----
-
-根据 CLAUDE.md 的七步工作流，当前已完成：
-1. ✅ `brainstorming`
-2. ✅ `writing-plans`
-3. ✅ `cold-start-validation`（冷启动验证）
-4. ✅ `P0-fixes`（修复关键文档问题）
-5. ✅ `T00` — 项目脚手架与 uv 配置（`488cf37`）
-6. ✅ `T01` — 核心数据模型（`24558fd`）
-7. ✅ `T03` — 配置加载器（`5fcfc9d`）
-
-9. ✅ `T02` — 文件系统与工作区工具（`d0cc83d`）
-
-接下来应该：
-<<<<<<< HEAD
-5. ⏭ 执行 T03/T04 等下一批任务
-=======
-5. ⏭ 执行 T02/T04 等下一批任务
->>>>>>> feat/T03-config
-6. ⏭ `subagent-driven-development` — 每个任务严格遵循 TDD
-
-**阶段门禁检查**：
-- ✅ SPEC.md 已完成
-- ✅ PLAN.md 已完成
-- ✅ SPEC_PROCESS.md 已完成
-- ✅ AGENT_LOG.md 已完成
-- ✅ 冷启动验证已通过（发现并修复 7 项 P0 问题）
-- ✅ T00 完成（`488cf37`）
-- ✅ T01 完成（`24558fd`）
-<<<<<<< HEAD
-- ✅ T02 完成（`d0cc83d`）
-=======
-- ✅ T03 完成（`5fcfc9d`）
->>>>>>> feat/T03-config
-
----
-
-## 待办事项
-
-<<<<<<< HEAD
-1. ✅ 执行 T02：文件系统与工作区解析工具函数（`d0cc83d`）
-2. ⏭ 执行 T03：配置加载（`phycode.toml` + 用户配置目录）
-3. ⏭ 执行 T04：策略引擎（深度维度核心）
-4. ⏭ 后续按 PLAN.md 依次执行 T05-T16
-=======
-1. ⏭ 执行 T02：文件系统与工作区解析工具函数
-2. ⏭ 执行 T04：策略引擎（深度维度核心）
-3. ⏭ 后续按 PLAN.md 依次执行 T05-T16
->>>>>>> feat/T03-config
+1. ✅ 执行 T04：策略引擎（深度维度核心）（`d7ac0ed`）
+2. ⏭ 执行 T05：反馈分类器
+3. ⏭ 执行 T06：工具注册表与运行时
+4. ⏭ 执行 T07：内置工具实现
+5. ⏭ 执行 T08：LLM 适配器
+6. ⏭ 执行 T09：上下文构建器与记忆
+7. ⏭ 执行 T10：Agent 主循环
+8. ⏭ 执行 T11：Trace 存储与脱敏
+9. ⏭ 执行 T12：凭据管理
+10. ⏭ 执行 T13：CLI 接口
+11. ⏭ 执行 T14：确定性演示
+12. ⏭ 执行 T15：CI 与打包
+13. ⏭ 执行 T16：文档与分发说明
